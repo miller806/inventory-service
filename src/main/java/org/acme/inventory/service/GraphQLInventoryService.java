@@ -1,9 +1,11 @@
 package org.acme.inventory.service;
 
+import io.quarkus.logging.Log;
 import io.quarkus.runtime.ApplicationConfig;
 import jakarta.inject.Inject;
-import org.acme.inventory.database.CarInventory;
+import jakarta.transaction.Transactional;
 import org.acme.inventory.model.Car;
+import org.acme.inventory.repository.CarRepository;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Mutation;
 import org.eclipse.microprofile.graphql.Query;
@@ -19,28 +21,30 @@ import java.util.Optional;
 @GraphQLApi
 public class GraphQLInventoryService {
     @Inject
-    CarInventory carInventory;
+    CarRepository carRepository;
     @Inject
     ApplicationConfig applicationConfig;
 
     @Query
     public List<Car> cars() {
-        return carInventory.getCars();
+        return carRepository.listAll();
     }
 
     @Mutation
+    @Transactional
     public Car register(Car car) {
-        car.id = CarInventory.ids.incrementAndGet();
-        carInventory.getCars().add(car);
+        carRepository.persist(car);
+        Log.info("Car persist: " + car);
         return car;
     }
 
+    @Transactional
+    @Mutation
     public boolean remove(String licensePlateNumber) {
-        List<Car> cars = carInventory.getCars();
-        Optional<Car> toBeRemoved = cars.stream().filter(car -> car.licensePlateNumber.equals(licensePlateNumber))
-                .findAny();
+        Optional<Car> toBeRemoved = carRepository.findByLicensePlateNumberOptional(licensePlateNumber);
         if (toBeRemoved.isPresent()) {
-            return cars.remove(toBeRemoved.get());
+            carRepository.delete(toBeRemoved.get());
+            return true;
         } else {
             return false;
         }
