@@ -24,7 +24,7 @@ public class GraphQLInventoryService {
     ApplicationConfig applicationConfig;
 
     @Query
-    public List<Car> cars() {
+        public List<Car> cars() {
         return carInventory.getCars();
     }
 
@@ -35,6 +35,7 @@ public class GraphQLInventoryService {
         return car;
     }
 
+    @Mutation
     public boolean remove(String licensePlateNumber) {
         List<Car> cars = carInventory.getCars();
         Optional<Car> toBeRemoved = cars.stream().filter(car -> car.licensePlateNumber.equals(licensePlateNumber))
