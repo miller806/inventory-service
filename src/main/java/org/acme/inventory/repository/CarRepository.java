@@ -2,7 +2,6 @@ package org.acme.inventory.repository;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.persistence.LockModeType;
 import org.acme.inventory.model.Car;
 
 import java.util.Optional;
